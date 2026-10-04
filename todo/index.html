@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일기장</title>
+<script>
+  // 화면이 그려지기 전에 저장된 모드를 먼저 적용해서, 새로고침 때 밝은 화면이 번쩍이지 않게 함.
+  // 외부 파일로 빼면 로드가 늦어 번쩍임이 되살아나므로 여기 인라인으로 둔다
+  try {
+    var saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.dataset.theme = saved;
+  } catch (e) {}
+</script>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>일기장</h1>
+    <div class="search-box">
+      <input type="search" id="q" placeholder="일기 검색" autocomplete="off" aria-label="일기 검색">
+      <button type="button" class="clear" id="qClear" aria-label="검색 지우기" hidden>×</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button type="button" class="pill" id="exportBtn">내보내기</button>
+      <button type="button" class="pill" id="importBtn">가져오기</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+      <a class="pill" href="about.html">👤 자기소개</a>
+      <button type="button" class="pill" id="themeToggle" aria-label="다크 모드 전환"></button>
+    </div>
+  </header>
+
+  <p class="banner" id="banner" hidden></p>
+
+  <main class="layout">
+    <section class="pane">
+      <div id="calendar"></div>
+      <div id="searchResults" hidden></div>
+    </section>
+    <section class="pane" id="detail"></section>
+  </main>
+
+<!-- 평범한 script 태그를 쓴다. type="module"은 file://에서 CORS로 막혀
+     파일을 더블클릭해 여는 방식이 깨지기 때문.
+     순서가 곧 의존 방향이다 — 뒤가 앞을 쓴다. -->
+<script src="js/theme.js"></script>
+<script src="js/dates.js"></script>
+<script src="js/mood.js"></script>
+<script src="js/store.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/search.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+/* 다이어리 화면. 색은 theme.css의 변수만 쓴다 — 여기서 색을 새로 정의하지 않는다. */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+.topbar h1 { margin: 0; font-size: 1.1rem; white-space: nowrap; }
+.topbar .spacer { flex: 1; }
+.topbar .actions { display: flex; gap: 8px; align-items: center; }
+
+.search-box { position: relative; flex: 1; max-width: 320px; min-width: 160px; }
+.search-box input {
+  width: 100%;
+  padding: 7px 30px 7px 32px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+}
+.search-box input:focus { border-color: var(--accent); }
+/* 브라우저가 type="search"에 붙여 주는 기본 지우기 버튼을 숨긴다.
+   우리가 만든 버튼과 겹쳐 ×가 두 개로 보이기 때문 */
+.search-box input::-webkit-search-cancel-button,
+.search-box input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+.search-box .clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.search-box .clear:hover { color: var(--danger); }
+
+.banner {
+  margin: 0;
+  padding: 10px 20px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.9rem;
+}
+.banner.ok { background: var(--accent); }
+
+/* 왼쪽 달력 + 오른쪽 상세. 좁아지면 위아래로 쌓는다 */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 380px) 1fr;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.pane {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* ───────── 달력 ───────── */
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.cal-title { margin: 0; font-size: 1.05rem; flex: 1; text-align: center; }
+.cal-nav {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cal-nav:hover { border-color: var(--accent); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-dow {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding-bottom: 4px;
+}
+.cal-dow.sun, .cal-cell.sun .cal-num { color: var(--danger); }
+.cal-dow.sat, .cal-cell.sat .cal-num { color: var(--accent); }
+
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.cal-cell.empty { cursor: default; }
+.cal-cell:not(.empty):hover { border-color: var(--accent); }
+.cal-num { font-size: 0.9rem; line-height: 1; }
+
+/* 기분이 있는 날만 색을 깐다. 글자가 묻히지 않게 아주 옅게 섞는다 */
+.cal-cell.has-mood {
+  background: color-mix(in srgb, var(--cell-mood) var(--mood-fill), transparent);
+}
+.cal-cell.today { border-color: var(--accent); border-width: 2px; font-weight: 700; }
+/* 선택은 배경을 꽉 채워 '지금 보고 있는 날'을 분명히 한다. 기분 색보다 우선 */
+.cal-cell.selected, .cal-cell.selected.has-mood {
+  background: var(--accent);
+}
+.cal-cell.selected .cal-num { color: #fff; }
+
+.cal-marks { display: flex; gap: 3px; height: 5px; align-items: center; }
+.mark { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
+.mark.todo { background: var(--accent); }
+.mark.todo.done { background: var(--muted); opacity: 0.5; }
+.cal-cell.selected .mark { background: #fff; }
+
+.cal-summary {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ───────── 검색 결과 ───────── */
+
+.search-count { margin: 0 0 12px; font-size: 0.85rem; color: var(--muted); }
+.search-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.search-item:hover { border-color: var(--accent); }
+.search-date { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; }
+.search-hit {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.search-check { margin-right: 4px; }
+.search-hit mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/* ───────── 오른쪽 상세 ───────── */
+
+.detail-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.detail-head h2 { margin: 0; font-size: 1.25rem; flex: 1; }
+.streak { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+
+/* 어제 / 오늘 / 내일 */
+.date-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+.date-nav .pill { padding: 6px 14px; }
+.date-nav .pill:disabled { opacity: 0.45; cursor: default; }
+.date-nav .pill:disabled:hover { border-color: var(--line); }
+
+.block { margin-bottom: 24px; }
+.block:last-child { margin-bottom: 0; }
+.block h3 {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.block h3 .count { margin-left: auto; font-weight: 400; }
+
+.mood-row { display: flex; gap: 8px; }
+.mood-btn {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.mood-face { font-size: 1.5rem; line-height: 1; filter: grayscale(1); opacity: 0.55; transition: filter 0.15s, opacity 0.15s; }
+.mood-btn:hover .mood-face { opacity: 0.8; }
+/* 고른 기분만 색이 돌아온다. 상태를 aria-pressed 하나로만 관리 */
+.mood-btn[aria-pressed="true"] {
+  border-color: var(--btn-mood);
+  background: color-mix(in srgb, var(--btn-mood) 16%, transparent);
+}
+.mood-btn[aria-pressed="true"] .mood-face { filter: none; opacity: 1; }
+
+.todo-list { list-style: none; margin: 0; padding: 0; }
+.todo-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.todo-list input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.todo-list .text { flex: 1; cursor: pointer; overflow-wrap: anywhere; }
+.todo-list li.done .text { text-decoration: line-through; color: var(--muted); }
+.todo-list .del {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.todo-list .del:hover { color: var(--danger); }
+
+.empty { color: var(--muted); font-size: 0.9rem; padding: 10px 0; margin: 0; }
+
+.todo-form { display: flex; gap: 8px; margin-top: 12px; }
+.todo-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+}
+.todo-form input:focus { border-color: var(--accent); }
+.todo-form .add {
+  padding: 0 16px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.pull {
+  margin-top: 10px;
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.pull:hover { border-color: var(--accent); color: var(--accent); }
+
+.block textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.6;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.block textarea:focus { border-color: var(--accent); }
+.save-state {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  min-height: 1.2em;
+}

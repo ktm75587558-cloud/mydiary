@@ -1,0 +1,85 @@
+/* 두 페이지가 공유하는 색·기본 타이포.
+   색은 반드시 아래 세 블록 모두에 선언한다:
+   :root(라이트) / @media 안의 :root:not([data-theme="light"]) / :root[data-theme="dark"]
+   가운데 블록의 :not()은 "직접 고른 라이트가 OS 다크보다 우선"을 만든다. */
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #8a9099;
+  --line: #e5e7eb;
+  --accent: #4f6bed;
+  --danger: #e5484d;
+  --mood-1: #e5484d;
+  --mood-2: #e07b39;
+  --mood-3: #8a9099;
+  --mood-4: #4f9d69;
+  --mood-5: #4f6bed;
+  /* 달력 셀에 기분 색을 얼마나 옅게 깔지. 다크에서는 더 진해야 보인다 */
+  --mood-fill: 20%;
+}
+
+/* 눈이 편하도록 완전한 검정/흰색 대신 부드러운 회색 톤 사용 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark; /* 체크박스·스크롤바 같은 기본 부품도 어둡게 */
+    --bg: #1a1c20;
+    --card: #23262b;
+    --text: #d7dade;
+    --muted: #868b93;
+    --line: #33373d;
+    --accent: #8a9cf0;
+    --danger: #f07a7d;
+    --mood-1: #f07a7d;
+    --mood-2: #eb9a66;
+    --mood-3: #868b93;
+    --mood-4: #74b98c;
+    --mood-5: #8a9cf0;
+    --mood-fill: 30%;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1a1c20;
+  --card: #23262b;
+  --text: #d7dade;
+  --muted: #868b93;
+  --line: #33373d;
+  --accent: #8a9cf0;
+  --danger: #f07a7d;
+  --mood-1: #f07a7d;
+  --mood-2: #eb9a66;
+  --mood-3: #868b93;
+  --mood-4: #74b98c;
+  --mood-5: #8a9cf0;
+  --mood-fill: 30%;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.25s, color 0.25s;
+}
+
+/* 위쪽 고정 알약 버튼 — 두 페이지가 같은 모양을 쓴다 */
+.pill {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-family: inherit; /* 버튼은 기본값이 브라우저 폰트라 따로 맞춰줘야 함 */
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.pill:hover { border-color: var(--accent); }
